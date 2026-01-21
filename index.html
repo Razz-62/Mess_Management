@@ -1,0 +1,965 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mess Management System</title>
+    <style>
+        /* --- CSS STYLES --- */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: #f5f5f5;
+            padding: 10px;
+        }
+
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 1.5rem;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        button {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        @media (max-width: 599px) {
+            button {
+                flex: 1;
+                min-width: 150px;
+            }
+        }
+
+        .btn-primary {
+            background: #2563eb;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #1d4ed8;
+        }
+
+        .btn-success {
+            background: #10b981;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #059669;
+        }
+
+        .btn-danger {
+            background: #ef4444;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #dc2626;
+        }
+
+        .btn-info {
+            background: #0891b2;
+            color: white;
+        }
+
+        .btn-info:hover {
+            background: #0e7490;
+        }
+
+        .btn-small {
+            padding: 6px 12px;
+            font-size: 12px;
+            min-width: auto;
+            flex: 0;
+        }
+
+        .summary-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .summary-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .summary-card h3 {
+            font-size: 0.9rem;
+            margin-bottom: 10px;
+            opacity: 0.9;
+        }
+
+        .summary-card .value {
+            font-size: 1.8rem;
+            font-weight: bold;
+        }
+
+        .records-list {
+            margin-top: 20px;
+        }
+
+        .record-card {
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+
+        .record-header {
+            background: #1f2937;
+            color: white;
+            padding: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .record-date {
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+
+        .table-container {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .mess-table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 800px;
+        }
+
+        .mess-table th,
+        .mess-table td {
+            border: 1px solid #000;
+            padding: 12px 8px;
+            text-align: center;
+            font-size: 13px;
+        }
+
+        .mess-table th {
+            background: #000;
+            color: white;
+            font-weight: 600;
+        }
+
+        .mess-table td {
+            background: white;
+        }
+
+        .mess-table .member-name {
+            font-weight: 600;
+            background: #f3f4f6;
+        }
+
+        .record-actions {
+            padding: 15px;
+            background: #f9fafb;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            overflow-y: auto;
+        }
+
+        .modal.active {
+            display: flex;
+            align-items: flex-start;
+            justify-content: center;
+            padding: 10px;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            max-width: 1000px;
+            width: 100%;
+            margin: 20px auto;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .modal-header h2 {
+            color: #333;
+            font-size: 1.25rem;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 28px;
+            cursor: pointer;
+            color: #666;
+            padding: 0;
+            width: 30px;
+            height: 30px;
+            flex-shrink: 0;
+        }
+
+        .close-btn:hover {
+            color: #000;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+            font-size: 14px;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #d1d5db;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+
+        .members-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .member-card {
+            border: 1px solid #e5e7eb;
+            padding: 15px;
+            border-radius: 8px;
+            background: #f9fafb;
+        }
+
+        .member-card h4 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 1rem;
+        }
+
+        .member-inputs {
+            display: grid;
+            gap: 10px;
+        }
+
+        @media (min-width: 600px) {
+            body {
+                padding: 20px;
+            }
+
+            .container {
+                padding: 25px;
+            }
+
+            h1 {
+                font-size: 2rem;
+                margin-bottom: 30px;
+            }
+
+            .modal-content {
+                padding: 30px;
+            }
+
+            .modal-header h2 {
+                font-size: 1.5rem;
+            }
+        }
+
+        @media print {
+            body {
+                background: white;
+                padding: 0;
+            }
+
+            .container {
+                box-shadow: none;
+            }
+
+            .button-group,
+            .record-actions {
+                display: none;
+            }
+        }
+    </style>
+
+    <!-- SheetJS Library for Excel Export -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+</head>
+
+<body>
+    <div class="container">
+        <h1>🍽️ Mess Management System</h1>
+
+        <div class="button-group">
+            <button class="btn-primary" onclick="openModal()">+ Add Daily Record</button>
+            <button class="btn-success" onclick="exportToExcel()">📥 Export to Excel</button>
+            <button class="btn-success" onclick="exportToGoogleSheets()">📊 Export to Google Sheets</button>
+            <button class="btn-info" onclick="openMembersModal()">👥 Manage Members</button>
+        </div>
+
+        <div class="summary-cards" id="summaryCards"></div>
+
+        <div id="recordsList" class="records-list"></div>
+    </div>
+
+    <!-- Add Record Modal -->
+    <div id="modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modalTitle">Add Daily Record</h2>
+                <button class="close-btn" onclick="closeModal()">&times;</button>
+            </div>
+
+            <div class="form-group">
+                <label>Date</label>
+                <input type="date" id="recordDate">
+            </div>
+
+            <div class="members-grid" id="membersContainer"></div>
+
+            <div class="button-group" style="margin-top: 20px;">
+                <button class="btn-success" onclick="saveRecord()">💾 Save Record</button>
+                <button class="btn-danger" onclick="closeModal()">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Manage Members Modal -->
+    <div id="membersModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Manage Members</h2>
+                <button class="close-btn" onclick="closeMembersModal()">&times;</button>
+            </div>
+
+            <div class="form-group">
+                <label>Add New Member</label>
+                <div style="display: flex; gap: 10px;">
+                    <input type="text" id="newMemberName" placeholder="Enter member name">
+                    <button class="btn-primary" onclick="addMember()">Add</button>
+                </div>
+            </div>
+
+            <div style="margin-top: 20px;">
+                <h3 style="margin-bottom: 10px;">Current Members:</h3>
+                <div id="membersList" style="display: flex; flex-direction: column; gap: 10px;"></div>
+            </div>
+
+            <div class="button-group" style="margin-top: 20px;">
+                <button class="btn-success" onclick="closeMembersModal()">Done</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        /* --- JAVASCRIPT LOGIC --- */
+
+        let records = [];
+        let members = ['SADIK', 'RAZ', 'Prottoy', 'Tanjim', 'majfuz', 'Emran', 'sopnil', 'Ruhel'];
+        let currentRecordId = null;
+
+        // Google Apps Script Web App URL - Replace with your deployment URL
+        const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwQZpCIKT_sUy_GX3TUZFx36nqV72oaw-IHeKPH4wD1HIhUuu61Za89SUDOxA4tvq4T/exec";
+
+        function getTodayDate() {
+            const today = new Date();
+            const yyyy = today.getFullYear();
+            const mm = String(today.getMonth() + 1).padStart(2, '0');
+            const dd = String(today.getDate()).padStart(2, '0');
+            return yyyy + '-' + mm + '-' + dd;
+        }
+
+        function showNotification(message, type) {
+            const notification = document.createElement('div');
+            notification.style.cssText = 'position:fixed;top:20px;right:20px;background:' + (type === 'success' ? '#10b981' : '#ef4444') + ';color:white;padding:15px 20px;border-radius:5px;z-index:10000;box-shadow:0 4px 12px rgba(0,0,0,0.15);font-weight:600;';
+            notification.textContent = message;
+            document.body.appendChild(notification);
+            setTimeout(() => { notification.remove(); }, 4000);
+        }
+
+        function loadData() {
+            const savedRecords = localStorage.getItem('messRecords');
+            const savedMembers = localStorage.getItem('messMembers');
+
+            if (savedRecords) {
+                records = JSON.parse(savedRecords);
+            } else {
+                // Sample data
+                records = [
+                    {
+                        id: 1,
+                        date: '01/01/2026',
+                        entries: {
+                            'SADIK': { meals: 2, expense: 50 },
+                            'RAZ': { meals: 3, expense: 75 },
+                            'Prottoy': { meals: 2, expense: 60 },
+                            'Tanjim': { meals: 1, expense: 30 },
+                            'majfuz': { meals: 2, expense: 45 },
+                            'Emran': { meals: 3, expense: 80 },
+                            'sopnil': { meals: 2, expense: 55 },
+                            'Ruhel': { meals: 2, expense: 50 }
+                        }
+                    }
+                ];
+                saveData();
+            }
+
+            if (savedMembers) {
+                members = JSON.parse(savedMembers);
+            } else {
+                saveMembers();
+            }
+        }
+
+        function saveData() {
+            localStorage.setItem('messRecords', JSON.stringify(records));
+        }
+
+        function saveMembers() {
+            localStorage.setItem('messMembers', JSON.stringify(members));
+        }
+
+        function calculateSummary() {
+            const summary = {};
+            
+            members.forEach(member => {
+                summary[member] = {
+                    totalMeals: 0,
+                    totalExpense: 0
+                };
+            });
+
+            records.forEach(record => {
+                Object.keys(record.entries).forEach(member => {
+                    if (summary[member]) {
+                        summary[member].totalMeals += record.entries[member].meals || 0;
+                        summary[member].totalExpense += record.entries[member].expense || 0;
+                    }
+                });
+            });
+
+            return summary;
+        }
+
+        function renderSummary() {
+            const container = document.getElementById('summaryCards');
+            const summary = calculateSummary();
+            
+            container.innerHTML = '';
+
+            // Total summary card
+            let totalMeals = 0;
+            let totalExpense = 0;
+
+            Object.values(summary).forEach(data => {
+                totalMeals += data.totalMeals;
+                totalExpense += data.totalExpense;
+            });
+
+            const totalCard = document.createElement('div');
+            totalCard.className = 'summary-card';
+            totalCard.style.background = 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)';
+            totalCard.innerHTML = `
+                <h3>Total Overview</h3>
+                <div class="value">${totalMeals} meals</div>
+                <div style="font-size: 1rem; margin-top: 5px;">৳${totalExpense.toFixed(2)}</div>
+            `;
+            container.appendChild(totalCard);
+
+            // Per capita card
+            const perCapita = totalMeals > 0 ? totalExpense / totalMeals : 0;
+            const perCapitaCard = document.createElement('div');
+            perCapitaCard.className = 'summary-card';
+            perCapitaCard.style.background = 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)';
+            perCapitaCard.innerHTML = `
+                <h3>Per Meal Rate</h3>
+                <div class="value">৳${perCapita.toFixed(2)}</div>
+            `;
+            container.appendChild(perCapitaCard);
+        }
+
+        function renderRecords() {
+            const container = document.getElementById('recordsList');
+            container.innerHTML = '';
+
+            if (records.length === 0) {
+                container.innerHTML = '<p style="text-align:center;color:#666;padding:40px;">No records yet. Click "Add Daily Record" to start.</p>';
+                return;
+            }
+
+            records.forEach(record => {
+                const card = document.createElement('div');
+                card.className = 'record-card';
+
+                const header = `
+                    <div class="record-header">
+                        <div class="record-date">📅 ${record.date}</div>
+                        <div style="display: flex; gap: 10px;">
+                            <button class="btn-primary btn-small" onclick="editRecord(${record.id})">Edit</button>
+                            <button class="btn-danger btn-small" onclick="deleteRecord(${record.id})">Delete</button>
+                        </div>
+                    </div>
+                `;
+
+                let table = '<div class="table-container"><table class="mess-table">';
+                table += '<thead><tr>';
+                table += '<th>Member</th>';
+                table += '<th>Meals</th>';
+                table += '<th>Expense (৳)</th>';
+                table += '</tr></thead><tbody>';
+
+                members.forEach(member => {
+                    const entry = record.entries[member] || { meals: 0, expense: 0 };
+                    table += '<tr>';
+                    table += `<td class="member-name">${member}</td>`;
+                    table += `<td>${entry.meals}</td>`;
+                    table += `<td>৳${entry.expense.toFixed(2)}</td>`;
+                    table += '</tr>';
+                });
+
+                // Totals row
+                let totalMeals = 0;
+                let totalExpense = 0;
+                Object.values(record.entries).forEach(entry => {
+                    totalMeals += entry.meals || 0;
+                    totalExpense += entry.expense || 0;
+                });
+
+                table += '<tr style="font-weight: bold; background: #f3f4f6;">';
+                table += '<td>TOTAL</td>';
+                table += `<td>${totalMeals}</td>`;
+                table += `<td>৳${totalExpense.toFixed(2)}</td>`;
+                table += '</tr>';
+
+                table += '</tbody></table></div>';
+
+                card.innerHTML = header + table;
+                container.appendChild(card);
+            });
+        }
+
+        function openModal() {
+            currentRecordId = null;
+            document.getElementById('modalTitle').textContent = 'Add Daily Record';
+            document.getElementById('recordDate').value = getTodayDate();
+            renderMembersForm();
+            document.getElementById('modal').className = 'modal active';
+        }
+
+        function closeModal() {
+            document.getElementById('modal').className = 'modal';
+        }
+
+        function renderMembersForm(recordData = null) {
+            const container = document.getElementById('membersContainer');
+            container.innerHTML = '';
+
+            members.forEach(member => {
+                const memberCard = document.createElement('div');
+                memberCard.className = 'member-card';
+
+                const meals = recordData ? (recordData[member]?.meals || 0) : 0;
+                const expense = recordData ? (recordData[member]?.expense || 0) : 0;
+
+                memberCard.innerHTML = `
+                    <h4>${member}</h4>
+                    <div class="member-inputs">
+                        <div class="form-group" style="margin-bottom: 0;">
+                            <label>Meals</label>
+                            <input type="number" class="member-meals" data-member="${member}" value="${meals}" min="0" step="1">
+                        </div>
+                        <div class="form-group" style="margin-bottom: 0;">
+                            <label>Expense (৳)</label>
+                            <input type="number" class="member-expense" data-member="${member}" value="${expense}" min="0" step="0.01">
+                        </div>
+                    </div>
+                `;
+
+                container.appendChild(memberCard);
+            });
+        }
+
+        function saveRecord() {
+            const date = document.getElementById('recordDate').value;
+
+            if (!date) {
+                showNotification('Please select a date.', 'error');
+                return;
+            }
+
+            const entries = {};
+            let hasData = false;
+
+            members.forEach(member => {
+                const mealsInput = document.querySelector(`.member-meals[data-member="${member}"]`);
+                const expenseInput = document.querySelector(`.member-expense[data-member="${member}"]`);
+
+                const meals = parseFloat(mealsInput.value) || 0;
+                const expense = parseFloat(expenseInput.value) || 0;
+
+                entries[member] = { meals, expense };
+
+                if (meals > 0 || expense > 0) {
+                    hasData = true;
+                }
+            });
+
+            if (!hasData) {
+                showNotification('Please enter at least one meal or expense.', 'error');
+                return;
+            }
+
+            // Format date
+            const dateParts = date.split('-');
+            const formattedDate = dateParts[2] + '/' + dateParts[1] + '/' + dateParts[0];
+
+            if (currentRecordId) {
+                // Update existing
+                const index = records.findIndex(r => r.id === currentRecordId);
+                if (index !== -1) {
+                    records[index].date = formattedDate;
+                    records[index].entries = entries;
+                }
+            } else {
+                // Add new
+                const newId = records.length > 0 ? Math.max(...records.map(r => r.id)) + 1 : 1;
+                records.push({
+                    id: newId,
+                    date: formattedDate,
+                    entries: entries
+                });
+            }
+
+            saveData();
+            showNotification('Record saved successfully!', 'success');
+            closeModal();
+            renderRecords();
+            renderSummary();
+        }
+
+        function editRecord(id) {
+            const record = records.find(r => r.id === id);
+            if (!record) return;
+
+            currentRecordId = id;
+            document.getElementById('modalTitle').textContent = 'Edit Record';
+            
+            // Convert date format
+            const dateParts = record.date.split('/');
+            const formattedDate = dateParts[2] + '-' + dateParts[1] + '-' + dateParts[0];
+            document.getElementById('recordDate').value = formattedDate;
+
+            renderMembersForm(record.entries);
+            document.getElementById('modal').className = 'modal active';
+        }
+
+        function deleteRecord(id) {
+            if (confirm('Are you sure you want to delete this record?')) {
+                const index = records.findIndex(r => r.id === id);
+                if (index !== -1) {
+                    records.splice(index, 1);
+                    saveData();
+                    renderRecords();
+                    renderSummary();
+                    showNotification('Record deleted.', 'success');
+                }
+            }
+        }
+
+        function openMembersModal() {
+            renderMembersList();
+            document.getElementById('membersModal').className = 'modal active';
+        }
+
+        function closeMembersModal() {
+            document.getElementById('membersModal').className = 'modal';
+        }
+
+        function renderMembersList() {
+            const container = document.getElementById('membersList');
+            container.innerHTML = '';
+
+            members.forEach((member, index) => {
+                const memberDiv = document.createElement('div');
+                memberDiv.style.cssText = 'display:flex;justify-content:space-between;align-items:center;padding:10px;background:#f9fafb;border-radius:5px;';
+                
+                const nameSpan = document.createElement('span');
+                nameSpan.style.fontWeight = '600';
+                nameSpan.textContent = member;
+                
+                const buttonContainer = document.createElement('div');
+                buttonContainer.style.cssText = 'display:flex;gap:10px;';
+                
+                const editBtn = document.createElement('button');
+                editBtn.className = 'btn-info btn-small';
+                editBtn.textContent = 'Edit';
+                editBtn.onclick = function() { editMember(index); };
+                
+                const removeBtn = document.createElement('button');
+                removeBtn.className = 'btn-danger btn-small';
+                removeBtn.textContent = 'Remove';
+                removeBtn.onclick = function() { removeMember(index); };
+                
+                buttonContainer.appendChild(editBtn);
+                buttonContainer.appendChild(removeBtn);
+                
+                memberDiv.appendChild(nameSpan);
+                memberDiv.appendChild(buttonContainer);
+                container.appendChild(memberDiv);
+            });
+        }
+
+        function addMember() {
+            const input = document.getElementById('newMemberName');
+            const name = input.value.trim();
+
+            if (!name) {
+                showNotification('Please enter a member name.', 'error');
+                return;
+            }
+
+            if (members.includes(name)) {
+                showNotification('Member already exists.', 'error');
+                return;
+            }
+
+            members.push(name);
+            saveMembers();
+            renderMembersList();
+            input.value = '';
+            showNotification('Member added!', 'success');
+        }
+
+        function editMember(index) {
+            const currentName = members[index];
+            const newName = prompt('Edit member name:', currentName);
+            
+            if (newName === null) {
+                // User cancelled
+                return;
+            }
+            
+            const trimmedName = newName.trim();
+            
+            if (!trimmedName) {
+                showNotification('Member name cannot be empty.', 'error');
+                return;
+            }
+            
+            if (trimmedName === currentName) {
+                // No change
+                return;
+            }
+            
+            if (members.includes(trimmedName)) {
+                showNotification('A member with this name already exists.', 'error');
+                return;
+            }
+            
+            // Update member name in members array
+            members[index] = trimmedName;
+            
+            // Update member name in all existing records
+            records.forEach(record => {
+                if (record.entries[currentName]) {
+                    record.entries[trimmedName] = record.entries[currentName];
+                    delete record.entries[currentName];
+                }
+            });
+            
+            saveMembers();
+            saveData();
+            renderMembersList();
+            renderRecords();
+            renderSummary();
+            showNotification('Member name updated!', 'success');
+        }
+
+        function removeMember(index) {
+            if (confirm('Remove this member? Their data will be kept in existing records.')) {
+                members.splice(index, 1);
+                saveMembers();
+                renderMembersList();
+                showNotification('Member removed.', 'success');
+            }
+        }
+
+        function exportToExcel() {
+            if (!records || records.length === 0) {
+                showNotification('No records to export.', 'error');
+                return;
+            }
+
+            try {
+                const workbook = XLSX.utils.book_new();
+                const excelData = [];
+
+                // Headers
+                const headers = ['Date'];
+                members.forEach(member => {
+                    headers.push(member + ' (Meal)', member + ' (Expense)');
+                });
+                excelData.push(headers);
+
+                // Data rows
+                records.forEach(record => {
+                    const row = [record.date];
+                    members.forEach(member => {
+                        const entry = record.entries[member] || { meals: 0, expense: 0 };
+                        row.push(entry.meals, entry.expense);
+                    });
+                    excelData.push(row);
+                });
+
+                const worksheet = XLSX.utils.aoa_to_sheet(excelData);
+
+                // Set column widths
+                const colWidths = [{ wch: 12 }];
+                members.forEach(() => {
+                    colWidths.push({ wch: 12 }, { wch: 12 });
+                });
+                worksheet['!cols'] = colWidths;
+
+                // Apply center alignment
+                const range = XLSX.utils.decode_range(worksheet['!ref']);
+                for (let row = range.s.r; row <= range.e.r; row++) {
+                    for (let col = range.s.c; col <= range.e.c; col++) {
+                        const cellAddress = XLSX.utils.encode_cell({ r: row, c: col });
+                        if (!worksheet[cellAddress]) continue;
+
+                        worksheet[cellAddress].s = {
+                            alignment: { horizontal: 'center', vertical: 'center' },
+                            border: {
+                                top: { style: 'thin' },
+                                bottom: { style: 'thin' },
+                                left: { style: 'thin' },
+                                right: { style: 'thin' }
+                            }
+                        };
+
+                        if (row === 0) {
+                            worksheet[cellAddress].s.font = { bold: true, color: { rgb: 'FFFFFF' } };
+                            worksheet[cellAddress].s.fill = { patternType: 'solid', fgColor: { rgb: '000000' } };
+                        }
+                    }
+                }
+
+                XLSX.utils.book_append_sheet(workbook, worksheet, 'Mess Records');
+
+                const timestamp = new Date().toISOString().slice(0, 10);
+                XLSX.writeFile(workbook, 'Mess_Records_' + timestamp + '.xlsx');
+
+                showNotification('✅ Exported to Excel!', 'success');
+            } catch (error) {
+                console.error('Excel export error:', error);
+                showNotification('❌ Export failed: ' + error.message, 'error');
+            }
+        }
+
+        async function exportToGoogleSheets() {
+            if (!records || records.length === 0) {
+                showNotification('No records to export.', 'error');
+                return;
+            }
+
+            if (WEB_APP_URL === "YOUR_GOOGLE_APPS_SCRIPT_URL_HERE") {
+                showNotification('⚠️ Please set up Google Sheets integration first.', 'error');
+                return;
+            }
+
+            try {
+                const formData = new URLSearchParams();
+                formData.append('action', 'bulk');
+                formData.append('records', JSON.stringify(records));
+                formData.append('members', JSON.stringify(members));
+
+                const response = await fetch(WEB_APP_URL, {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const text = await response.text();
+                console.log('Export response:', text);
+
+                if (text.includes('SUCCESS')) {
+                    showNotification('✅ Exported to Google Sheets!', 'success');
+                } else if (text.includes('ERROR')) {
+                    const errorMsg = text.replace('ERROR: ', '');
+                    showNotification('❌ Export failed: ' + errorMsg, 'error');
+                } else {
+                    showNotification('Export completed. Check your Google Sheet.', 'success');
+                }
+            } catch (error) {
+                console.error('Export failed:', error);
+                showNotification('❌ Export failed: ' + error.message, 'error');
+            }
+        }
+
+        // Initialize
+        window.onload = function () {
+            loadData();
+            renderRecords();
+            renderSummary();
+        };
+    </script>
+</body>
+
+</html>
