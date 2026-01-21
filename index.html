@@ -339,9 +339,6 @@
             }
         }
     </style>
-
-    <!-- SheetJS Library for Excel Export -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 </head>
 
 <body>
@@ -350,7 +347,6 @@
 
         <div class="button-group">
             <button class="btn-primary" onclick="openModal()">+ Add Daily Record</button>
-            <button class="btn-success" onclick="exportToExcel()">📥 Export to Excel</button>
             <button class="btn-success" onclick="exportToGoogleSheets()">📊 Export to Google Sheets</button>
             <button class="btn-info" onclick="openMembersModal()">👥 Manage Members</button>
         </div>
@@ -417,7 +413,7 @@
         let currentRecordId = null;
 
         // Google Apps Script Web App URL - Replace with your deployment URL
-        const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwQZpCIKT_sUy_GX3TUZFx36nqV72oaw-IHeKPH4wD1HIhUuu61Za89SUDOxA4tvq4T/exec";
+        const WEB_APP_URL = "YOUR_GOOGLE_APPS_SCRIPT_URL_HERE";
 
         function getTodayDate() {
             const today = new Date();
@@ -616,8 +612,9 @@
                 const memberCard = document.createElement('div');
                 memberCard.className = 'member-card';
 
-                const meals = recordData ? (recordData[member]?.meals || 0) : 0;
-                const expense = recordData ? (recordData[member]?.expense || 0) : 0;
+                // If recordData exists (editing), use those values, otherwise use 0
+                const meals = recordData && recordData[member] ? recordData[member].meals : 0;
+                const expense = recordData && recordData[member] ? recordData[member].expense : 0;
 
                 memberCard.innerHTML = `
                     <h4>${member}</h4>
@@ -839,78 +836,6 @@
                 saveMembers();
                 renderMembersList();
                 showNotification('Member removed.', 'success');
-            }
-        }
-
-        function exportToExcel() {
-            if (!records || records.length === 0) {
-                showNotification('No records to export.', 'error');
-                return;
-            }
-
-            try {
-                const workbook = XLSX.utils.book_new();
-                const excelData = [];
-
-                // Headers
-                const headers = ['Date'];
-                members.forEach(member => {
-                    headers.push(member + ' (Meal)', member + ' (Expense)');
-                });
-                excelData.push(headers);
-
-                // Data rows
-                records.forEach(record => {
-                    const row = [record.date];
-                    members.forEach(member => {
-                        const entry = record.entries[member] || { meals: 0, expense: 0 };
-                        row.push(entry.meals, entry.expense);
-                    });
-                    excelData.push(row);
-                });
-
-                const worksheet = XLSX.utils.aoa_to_sheet(excelData);
-
-                // Set column widths
-                const colWidths = [{ wch: 12 }];
-                members.forEach(() => {
-                    colWidths.push({ wch: 12 }, { wch: 12 });
-                });
-                worksheet['!cols'] = colWidths;
-
-                // Apply center alignment
-                const range = XLSX.utils.decode_range(worksheet['!ref']);
-                for (let row = range.s.r; row <= range.e.r; row++) {
-                    for (let col = range.s.c; col <= range.e.c; col++) {
-                        const cellAddress = XLSX.utils.encode_cell({ r: row, c: col });
-                        if (!worksheet[cellAddress]) continue;
-
-                        worksheet[cellAddress].s = {
-                            alignment: { horizontal: 'center', vertical: 'center' },
-                            border: {
-                                top: { style: 'thin' },
-                                bottom: { style: 'thin' },
-                                left: { style: 'thin' },
-                                right: { style: 'thin' }
-                            }
-                        };
-
-                        if (row === 0) {
-                            worksheet[cellAddress].s.font = { bold: true, color: { rgb: 'FFFFFF' } };
-                            worksheet[cellAddress].s.fill = { patternType: 'solid', fgColor: { rgb: '000000' } };
-                        }
-                    }
-                }
-
-                XLSX.utils.book_append_sheet(workbook, worksheet, 'Mess Records');
-
-                const timestamp = new Date().toISOString().slice(0, 10);
-                XLSX.writeFile(workbook, 'Mess_Records_' + timestamp + '.xlsx');
-
-                showNotification('✅ Exported to Excel!', 'success');
-            } catch (error) {
-                console.error('Excel export error:', error);
-                showNotification('❌ Export failed: ' + error.message, 'error');
             }
         }
 
